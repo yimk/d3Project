@@ -1,0 +1,161 @@
+<h3>MINARD's MAP</h3>
+
+<div id="minard-map">
+    <div id="map"></div>
+    <div id="graph"></div>
+</div>
+<script>
+
+    const WIDTH = 1510;
+    const HEIGHT = 400;
+    const MAGNIFIER = 100;
+    const COLOR = ["#87cefa", "orange", "green"];
+    const POSITION_X = 23 * MAGNIFIER;
+    const POSITION_Y = -57 * MAGNIFIER ;
+
+    const graphPos_X = WIDTH-20;
+    const graphPos_Y = HEIGHT;
+
+    d3.csv("minard-data.csv", function(dataset) {
+
+        // create map svg container
+        var mapSVG = d3.select("#map").append("svg")
+            .attr("width", WIDTH)
+            .attr("height", HEIGHT);
+
+        var graphSVG = d3.select("#graph").append("svg")
+            .attr("width", WIDTH+100000)
+            .attr("height", HEIGHT+100);
+
+        // create graph
+        graphSVG.append("line")         // attach a line
+            .style("stroke", "black")
+            .attr("x1", graphPos_X)     // x position of the first end of the line
+            .attr("y1", 0)      // y position of the first end of the line
+            .attr("x2", graphPos_X)     // x position of the second end of the line
+            .attr("y2", graphPos_Y);   // y position of the second end of the line
+
+        for( i=0; i<9; i++){
+            graphSVG.append("line")         // attach a line
+                .style("stroke", "black")
+                .attr("x1", graphPos_X-5)     // x position of the first end of the line
+                .attr("y1", i*50)      // y position of the first end of the line
+                .attr("x2", graphPos_X+5)     // x position of the second end of the line
+                .attr("y2", i*50);    // y position of the second end of the line
+
+            graphSVG.append("text")
+                .attr("x", graphPos_X+5)
+                .attr("y", i*50+10)
+                .attr("font-family", "Verdana")
+                .attr("font-size", 10)
+                .text(i*5);
+        }
+
+
+        var prev_longitdue = dataset[0]["LONP"];
+        var prev_latitude = dataset[0]["LATP"];
+        var prev_surv = dataset[0]["SURV"];
+
+        var pre_day = 0;
+        var pre_temperature = 0;
+
+        var div_size = Math.max.apply(Math,dataset.map(function(o){return o.DIV;}))
+
+        var attack = dataset[0]["DIR"]
+
+        for ( var div = 0; div < div_size; div++) {
+
+            var current_color = COLOR[div]
+            current_army_dataset = dataset.filter(function (el) {
+                return el.DIV == div + 1
+            });
+
+            current_army_dataset.forEach(function (data) {
+
+                current_longitdue = data["LONP"] * MAGNIFIER;
+                current_latitude = data["LATP"] * MAGNIFIER;
+                current_surv = data["SURV"];
+                current_day = parseInt(data["DAYS"]);
+                current_temp = data["TEMP"]
+
+                console.log( (data["DIR"]) == attack);
+                if ((data["DIR"]) == attack) {
+                    mapSVG.append("line")         // attach a line
+                        .style("stroke", current_color)
+                        .attr("stroke-width", prev_surv / 7000)  // colour the line
+                        .attr("x1", prev_longitdue)     // x position of the first end of the line
+                        .attr("y1", -prev_latitude)      // y position of the first end of the line
+                        .attr("x2", current_longitdue)     // x position of the second end of the line
+                        .attr("y2", -current_latitude)    // y position of the second end of the line
+                        .attr("transform", "translate(" + -POSITION_X + " " + -POSITION_Y + ")")
+                }
+                else{
+                    mapSVG.append("line")         // attach a line
+                        .style("stroke-dasharray","5,5")//dashed array for line
+                        .attr("stroke-width", prev_surv / 7000)  // colour the line
+                        .attr("x1", prev_longitdue)     // x position of the first end of the line
+                        .attr("y1", -prev_latitude)      // y position of the first end of the line
+                        .attr("x2", current_longitdue)     // x position of the second end of the line
+                        .attr("y2", -current_latitude)    // y position of the second end of the line
+                        .attr("transform", "translate(" + -POSITION_X + " " + -POSITION_Y + ")")
+                        .style("stroke", current_color);
+
+                }
+
+
+
+                if (data["TEMP"] != "") {
+
+
+                    graphSVG.append("line")         // attach a line
+                        .style("stroke", "red")
+                        .attr("stroke-width", 5)
+                        .attr("x1", (graphPos_X-pre_day*25))     // x position of the first end of the line
+                        .attr("y1", -pre_temperature*10)      // y position of the first end of the line
+                        .attr("x2",  graphPos_X-(pre_day+current_day)*25)     // x position of the second end of the line
+                        .attr("y2", -current_temp*10);    // y position of the second end of the line
+
+                    graphSVG.append("text")
+                        .attr("x", (graphPos_X-pre_day*25))
+                        .attr("y", -pre_temperature*10 +20)
+                        .attr("font-family", "Verdana")
+                        .attr("font-size", 10)
+                        .text(data["CITY"])
+
+                    pre_day = pre_day + current_day
+                    pre_temperature = current_temp
+                }
+
+                prev_longitdue = current_longitdue;
+                prev_latitude = current_latitude;
+                prev_surv = current_surv;
+            })
+        }
+
+
+        // add cities on map
+        dataset.forEach(function(data){
+
+            if (data["CITY"] != "") {
+                city_longitdue = data["LONC"] * MAGNIFIER;
+                city_latitude = data["LATC"] * MAGNIFIER;
+
+                mapSVG.append("circle")
+                    .attr("cx", city_longitdue)
+                    .attr("cy", -city_latitude)
+                    .attr("r", 4)
+                    .attr("fill", "black")
+                    .attr("transform", "translate(" + -POSITION_X + " " + -POSITION_Y + ")")
+                mapSVG.append("text")
+                    .attr("x", city_longitdue + 10)
+                    .attr("y", -city_latitude + 10)
+                    .attr("font-family", "Verdana")
+                    .attr("font-size", 10)
+                    .text(data["CITY"])
+                    .attr("transform", "translate(" + -POSITION_X + " " + -POSITION_Y + ")")
+            }
+
+        });
+
+    });
+</script>

@@ -1,0 +1,93 @@
+<h3>Basic Shape</h3>
+
+
+
+<h4>Line</h4>
+<div id="line" display="block">
+    <svg width="200" height="200">
+        <line x1="5" y1="5" x2="100" y2="100" stroke="gray" stroke-width="1"  />
+    </svg>
+
+    <svg width="200" height="200">
+        <line x1="10" y1="5" x2="10" y2="100" stroke="blue" stroke-width="1"  />
+    </svg>
+
+    <svg width="200" height="200">
+        <line x1="0" y1="25" x2="100" y2="25" stroke="blue" stroke-width="1"  />
+    </svg>
+</div>
+
+<h4>Rectangle</h4>
+<div id="rect" display="block">
+    <svg width="200" height="200">
+        <rect x="0" y="0" width="100" height="50" fill="green" />
+    </svg>
+
+    <svg width="200" height="200">
+        <rect x="0" y="0" width="50" height="50" fill="blue" transform="translate(30) rotate(45 50 50)"/>
+    </svg>
+
+    <svg width="200" height="200">
+        <rect x="20" y="20" width="100" height="50" fill="red" transform="translate(30) rotate(45 50 50)"/>
+    </svg>
+</div>
+
+<h4>Circle</h4>
+<div id="circle" display="block">
+    <svg width="200" height="200">
+        <circle cx="25" cy="25" r="10" fill="purple" />
+    </svg>
+
+    <svg width="200" height="200">
+        <circle cx="25" cy="25" r="20" fill="red" />
+    </svg>
+
+
+</div>
+
+<h4>Arc</h4>
+<div id="arc">
+    <div id="arc1"></div>
+    <script>
+        var vis = d3.select("#arc1").append("svg").attr("width", "500").attr("height", "500");
+        var pi = Math.PI;
+
+        var arc = d3.arc()
+            .innerRadius(50)
+            .outerRadius(70)
+            .startAngle(45 * (pi/180)) //converting from degs to radians
+            .endAngle(3) //just radians
+
+        var arc2 = d3.arc()
+            .innerRadius(50)
+            .outerRadius(70)
+            .startAngle(-45 * (pi/180)) //converting from degs to radians
+            .endAngle(1) //just radians
+
+        var arc3 = d3.arc()
+            .innerRadius(50)
+            .outerRadius(70)
+            .startAngle(-188 * (pi/180)) //converting from degs to radians
+            .endAngle(-0.5) //just radians
+
+        vis.append("path")
+            .attr("d", arc)
+            .attr("fill", "red")
+            .attr("transform", "translate(200,200)")
+
+        vis.append("path")
+            .attr("d", arc2)
+            .attr("fill", "blue")
+            .attr("transform", "translate(200,200)");
+
+        vis.append("path")
+            .attr("d", arc3)
+            .attr("fill", "yellow")
+            .attr("transform", "translate(200,200)");
+
+
+    </script>
+
+
+
+</div>
